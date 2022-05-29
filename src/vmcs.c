@@ -1,17 +1,24 @@
 #include "vmcs.h"
 #include "util.h"
-#include "depend.h"
 
 
-struct vmcs* alloc_vmcs(void){
-    struct page* page = alloc_page(GFP_KERNEL);
-
-    return (struct vmcs*)page_address(page);
+struct qogchamp_vmcs* alloc_vmcs(void){
+    void* page = (void*)get_zeroed_page(GFP_KERNEL); //the vmcs needs to be zeroed
+    if(!page)
+        return NULL;
+    struct qogchamp_vmcs* ret = kmalloc(sizeof(struct qogchamp_vmcs), GFP_KERNEL);
+    ret -> addr = page_address(page);
+    ret -> phys_addr = __pa(ret->addr);
+    return ret;
 }
 
-void free_vmcs(struct vmcs* ptr){
-    struct page* page = virt_to_page(ptr); //this works because page_address just does page -> virtual. 
-    free_page(page);
+void free_vmcs(struct qogchamp_vmcs* ptr){
+
+    BUG_ON(!ptr); 
+    
+    free_page((unsigned long)ptr -> addr);
+    kfree(ptr);
+    
 }
 
 

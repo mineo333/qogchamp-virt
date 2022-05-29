@@ -3,21 +3,22 @@
 
 #include "depend.h"
 
-struct vmcs_hdr{
-    u32 revision_id:31;
-    u32 shadow_vmcs:1;
+/*
+The intel VMCS as well as the VMX strcture are technically opaque data structures as their structure may change between . The former should be accessed via the vmwrite and vmread instructions. 
+
+
+*/
+
+struct qogchamp_vmcs{
+    void* addr;
+    phys_addr_t phys_addr;
+
 };
 
-struct vmcs{
-    struct vmcs_hdr hdr;
-    u32 abort;
-    char data[]    
-};   
+DECLARE_PER_CPU(struct qogchamp_vmcs*, percpu_vmcs);
 
-DECLARE_PERCPU(struct vmcs*, percpu_vmcs);
-
-struct vmcs* alloc_vmcs(void);
-void free_vmcs(struct vmcs* ptr);
+struct qogchamp_vmcs* alloc_vmcs(void);
+void free_vmcs(struct qogchamp_vmcs* ptr);
 
 #endif
 
