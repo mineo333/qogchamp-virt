@@ -3,12 +3,12 @@
 
 
 struct qogchamp_vmcs* alloc_vmcs(void){
-    void* page = (void*)get_zeroed_page(GFP_KERNEL); //the vmcs needs to be zeroed
-    if(!page)
+    void* zero_page = (void*)get_zeroed_page(GFP_KERNEL); //the vmcs needs to be zeroed
+    if(!zero_page)
         return NULL;
     struct qogchamp_vmcs* ret = kmalloc(sizeof(struct qogchamp_vmcs), GFP_KERNEL);
-    ret -> addr = page_address(page);
-    ret -> phys_addr = __pa(ret->addr);
+    ret -> addr = zero_page;
+    ret -> phys_addr = __pa(zero_page); //get the physical address associated with the page
     return ret;
 }
 

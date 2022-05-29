@@ -18,13 +18,13 @@ BUILD_DIR := $(PWD)/bin #output directory
 
 CFLAGS_MODULE := -I$(PWD)/include -Wno-declaration-after-statement #this warning clobbers the make
 
-KBUILD_OUTPUT:= $(PWD)/bin
+#KBUILD_OUTPUT:= $(PWD)/bin
 
 
 all:
 	mkdir -p bin
 	@echo $($(MODULE_NAME)-y)
-	make -C $(KDIR) M=$(PWD) modules
-	mv src/*.o $(MODULE_NAME).mod* modules.order $(BUILD_DIR) #clean up
+	make -C $(KDIR) M=$(PWD)  modules
+#	mv src/*.o $(MODULE_NAME).mod* modules.order $(BUILD_DIR) #clean up
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
