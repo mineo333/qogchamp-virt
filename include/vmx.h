@@ -1,9 +1,23 @@
-//Credit to: https://raw.githubusercontent.com/LordNoteworthy/cpu-internals/master/headers/vmx.h
+#ifndef __VIRT_VMX_H
+#define __VIRT_VMX_H
+
+#include "depend.h"
+
+#define VMX_BIT 1 << 5
+
+int __vmx_support(void);
+
+int vmx_support(void);
+/*
+
+Everything below is from:  https://github.com/LordNoteworthy/cpu-internals/master/headers/vmx.h
+
+*/
 
 // Updated to reflect Intel SDM of January 2019
 
 // Appendix B Field Encoding in VMCS
-typedef enum _VMCS_ENCODING
+enum _VMCS_ENCODING
 {
     VIRTUAL_PROCESSOR_ID = 0x00000000,  // 16-Bit Control Field
     POSTED_INTERRUPT_NOTIFICATION = 0x00000002,
@@ -186,10 +200,10 @@ typedef enum _VMCS_ENCODING
     HOST_IA32_SYSENTER_EIP = 0x00006c12,
     HOST_RSP = 0x00006c14,
     HOST_RIP = 0x00006c16
-} VMCS_ENCODING;
+};
 
 // Appendix C VMX Basic Exit Reasons
-typedef enum _VM_EXIT_REASON
+enum _VM_EXIT_REASON
 {
     EXIT_REASON_EXCEPTION_NMI = 0,        // Exception or non-maskable interrupt (NMI).
     EXIT_REASON_EXTERNAL_INTERRUPT = 1,   // External interrupt.
@@ -258,4 +272,6 @@ typedef enum _VM_EXIT_REASON
     EXIT_REASON_XRSTORS = 64,             // Guest software attempted to executed XRSTORS and exiting was enabled.
     EXIT_REASON_RESERVED_65 = 65,         // Reserved
     EXIT_REASON_SPP = 66,                 // The processor attempted to determine an access’s sub - page write permission and encountered
-} VM_EXIT_REASON;
+};
+
+#endif

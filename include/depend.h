@@ -22,5 +22,7 @@ This file contains system dependencies. Is it bad design? Yea. Do I care? No.
 #include <asm-generic/bug.h>
 #include <linux/mm.h>
 
+#include <linux/errno.h>
+
 
 #endif

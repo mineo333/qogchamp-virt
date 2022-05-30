@@ -1,16 +1,21 @@
 #include "depend.h"
-
 #include "util.h"
-
-
+#include "vmx.h"
 
 
 
 
 
 int virt_init(void){
-    pr_info("Initializing hypervisor");
-    
+    pr_info("Initializing hypervisor\n");
+    if(vmx_support())
+        pr_info("VMX Supported: true\n");
+    else{
+        pr_info("VMX not supported!\n");
+        return -ENODEV;  
+    }
+    //if it is supported we may continue
+
     return 0;
 }
 

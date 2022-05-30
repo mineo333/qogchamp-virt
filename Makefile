@@ -4,7 +4,7 @@ MODULE_NAME := virt
 
 obj-m += $(MODULE_NAME).o
 
-OBJ := virt_main.o vmcs.o vmx_asm.o
+OBJ := virt_main.o vmcs.o vmx_asm.o vmx.o
 
 $(MODULE_NAME)-y := $(patsubst %.o, src/%.o, $(OBJ))
 
@@ -16,7 +16,7 @@ BUILD_DIR := $(PWD)/bin #output directory
 
 ############################ Kbuild options ############################
 
-CFLAGS_MODULE := -I$(PWD)/include -Wno-declaration-after-statement #this warning clobbers the make
+CFLAGS_MODULE := -I$(PWD)/include -Wno-declaration-after-statement -ggdb  #this warning clobbers the make
 
 #KBUILD_OUTPUT:= $(PWD)/bin
 
