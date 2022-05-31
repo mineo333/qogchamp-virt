@@ -3,11 +3,56 @@
 
 #include "depend.h"
 
+#undef wrmsr //get rid of the two definitions. we're using our own. 
+#undef rdmsr
+
 #define VMX_BIT 1 << 5
 
 int __vmx_support(void);
 
-int vmx_support(void);
+static inline int vmxon(uint64_t phys)
+{
+	uint8_t ret;
+
+	__asm__ __volatile__ ("vmxon %[pa]; setna %[ret]"
+		: [ret]"=rm"(ret)
+		: [pa]"m"(phys)
+		: "cc", "memory");
+
+	return ret;
+}
+
+static inline uint64_t rdmsr(uint32_t msr)
+{
+	uint32_t a, d;
+
+	__asm__ __volatile__("rdmsr" : "=a"(a), "=d"(d) : "c"(msr) : "memory");
+
+	return a | ((uint64_t) d << 32);
+}
+
+static inline void wrmsr(uint32_t msr, uint64_t value)
+{
+	uint32_t a = value;
+	uint32_t d = value >> 32;
+
+	__asm__ __volatile__("wrmsr" :: "a"(a), "d"(d), "c"(msr) : "memory");
+}
+
+
+
+
+u8 vmx_on(phys_addr_t page_addr);
+
+void vmx_off(void);
+
+
+void enable_vtx_cr4(void);
+
+int vmx_support(void); //wrapper for __vmx_supprt
+
+
+void vmx_setup(void* info);
 /*
 
 Everything below is from:  https://github.com/LordNoteworthy/cpu-internals/master/headers/vmx.h

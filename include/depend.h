@@ -23,6 +23,8 @@ This file contains system dependencies. Is it bad design? Yea. Do I care? No.
 #include <linux/mm.h>
 
 #include <linux/errno.h>
+#include <linux/smp.h>
 
+#include <asm/special_insns.h>
 
 #endif

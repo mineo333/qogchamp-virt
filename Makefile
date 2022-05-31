@@ -4,7 +4,7 @@ MODULE_NAME := virt
 
 obj-m += $(MODULE_NAME).o
 
-OBJ := virt_main.o vmcs.o vmx_asm.o vmx.o
+OBJ := virt_main.o vmx_region.o vmx_asm.o vmx.o
 
 $(MODULE_NAME)-y := $(patsubst %.o, src/%.o, $(OBJ))
 

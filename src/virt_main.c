@@ -14,8 +14,9 @@ int virt_init(void){
         pr_info("VMX not supported!\n");
         return -ENODEV;  
     }
-    //if it is supported we may continue
-
+    //if VT-x is supported we may continue
+    //on_each_cpu(vmx_setup, NULL, 0); 
+   vmx_setup(NULL);
     return 0;
 }
 
