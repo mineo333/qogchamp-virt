@@ -40,12 +40,13 @@ static void vtx_feature_check(void){
 		wrmsr(MSR_IA32_FEAT_CTL, feature_control | required);
 }
 
-static unsigned int vmcs_revision_id(){
-
+static unsigned int vmcs_revision_id(void){
+	return rdmsr(MSR_IA32_VMX_BASIC) & REVISION_ID_MASK; 
 }
 
 static void setup_vmx_cpu(struct vmx_cpu* vmx_cpu){
-	
+	struct vmx_on_region* vmx_on_region = vmx_cpu->vmx_on->vmx_on;
+	vmx_on_region -> vmcs_revision_id = vmcs_revision_id();
 }
 
 
@@ -55,9 +56,9 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
  
 
 
-    struct vmx_region* region = alloc_vmx_region();
+    struct vmx_cpu* vmx_cpu = alloc_vmx_cpu(cpu);
 
-    if(!region){
+    if(!vmx_cpu){
         pr_info("Couldn't initalize CPU %d\n", cpu);
         goto out;
     }
@@ -65,25 +66,28 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
     
 	vtx_feature_check();
 
+	setup_vmx_cpu(vmx_cpu);
 
 
     
 
-    pr_info("CPU %d region: 0x%llx\n", cpu, region -> phys_addr);
+    pr_info("CPU %d region: 0x%llx\n", cpu, vmx_cpu -> vmx_on -> phys_addr);
     
-    if(vmx_on(region -> phys_addr)){
+    if(vmx_on(vmx_cpu -> vmx_on -> phys_addr)){
         pr_err("CPU %d failed to enter VMX root operation\n", cpu);
-        return;
+        goto out;
     }
 
     pr_info("CPU %d is now in VMX Root Operation!\n", cpu);
 
     vmx_off();
 
+	pr_info("CPU %d has noe exited VMX Root Operation!\n", cpu);
+
     
 out:  
-    if(region)
-        free_vmx_region(region);
+    if(vmx_cpu)
+        free_vmx_cpu(vmx_cpu);
 
     put_cpu();
     

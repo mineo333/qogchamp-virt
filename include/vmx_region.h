@@ -9,14 +9,20 @@ The intel VMCS as well as the VMX strcture are technically opaque data structure
 */
 
 
-
+struct vmcs_hdr{
+    u32 revision_id:31;
+    u32 shadow_vmcs:1;
+};
 
 struct vmx_on_region{
-
+    u32 vmcs_revision_id;
+    char data[]; //data should not be accessed
 };
 
 struct vmcs{
-
+    struct vmcs_hdr vmcs_hdr;
+    u32 abort;
+    char data[];
 };
 
 struct vmx_region{ //this is used for both the VMXON region as well as the VMCS
@@ -29,7 +35,7 @@ struct vmx_region{ //this is used for both the VMXON region as well as the VMCS
 
 struct vmx_cpu{
     unsigned int cpu;
-    struct vmx_region* vmcs; 
+    struct vmx_region* vmcs; //this is probably questionable design and can probably be improved. 
     struct vmx_region* vmx_on;
 };
 
@@ -39,8 +45,8 @@ struct vmx_cpu{
 
 DECLARE_PER_CPU(struct qogchamp_vmcs*, percpu_vmcs);
 
-struct vmx_region* alloc_vmx_region(void);
-void free_vmx_region(struct vmx_region* ptr);
+struct vmx_cpu* alloc_vmx_cpu(int cpu);
+void free_vmx_cpu(struct vmx_cpu* vmx_cpu);
 
 #endif
 

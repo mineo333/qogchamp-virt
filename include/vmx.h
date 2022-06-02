@@ -8,6 +8,8 @@
 
 #define VMX_BIT 1 << 5
 
+#define REVISION_ID_MASK ((1 << 31) - 1);
+
 int __vmx_support(void);
 
 static inline int vmxon(uint64_t phys)

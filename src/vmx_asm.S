@@ -26,10 +26,10 @@ SYM_FUNC_END(__vmx_support)
 #RDI contains physical pointer
 
 SYM_FUNC_START(vmx_on)
-    xor rax, rax
+    
     push rdi    
     vmxon [rsp]
-    setb al
+    setbe al
     add rsp, 8
     ret
 
