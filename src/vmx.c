@@ -1,8 +1,6 @@
 #include "vmx.h"
 #include "vmx_region.h"
-int vmx_support(void){
-    return __vmx_support() & VMX_BIT;
-}
+
 
 static void vtx_feature_check(void){
 	uint64_t feature_control;
@@ -49,6 +47,19 @@ static void setup_vmx_on(struct vmx_cpu* vmx_cpu){
 	vmx_on_region -> vmcs_revision_id = vmcs_revision_id();
 }
 
+static void setup_vmcs(struct vmx_cpu* vmx_cpu){
+	struct vmcs* vmcs = vmx_cpu -> vmcs -> vmcs;
+
+	vmcs -> vmcs_hdr.revision_id = vmcs_revision_id(); //setup revision id
+
+
+
+	
+}
+
+
+
+
 
 
 static void __vmx_setup(void){ //this function **might** run in interrupt context because it is called via an IPI
@@ -68,7 +79,7 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
 
 	setup_vmx_on(vmx_cpu);
 
-	//this_cpu_write(percpu_vmx_cpu, vmx_cpu);
+	this_cpu_write(percpu_vmx_cpu, vmx_cpu);
 
 
     
@@ -80,18 +91,27 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
         goto out;
     }
 
+	this_cpu_write(vmx_on_pcpu, 1);
+
+
     pr_info("CPU %d is now in VMX Root Operation!\n", cpu);
 
-    vmx_off();
+    vmx_off(); //if this faults it will be invalid opcode. so we'll die anyway :)
 
-	pr_info("CPU %d has noe exited VMX Root Operation!\n", cpu);
+	this_cpu_write(vmx_on_pcpu, 0);
+
+	pr_info("CPU %d has now exited VMX Root Operation!\n", cpu);
 
 	
 
     
 out:  
-    if(vmx_cpu)
-        free_vmx_cpu(vmx_cpu);
+    if(vmx_cpu){
+		free_vmx_cpu(vmx_cpu);
+		this_cpu_write(percpu_vmx_cpu, NULL);
+	}
+        
+	
 
     put_cpu();
     

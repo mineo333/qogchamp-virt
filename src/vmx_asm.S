@@ -8,7 +8,11 @@
 #this entire file is intended to contain assembly utility functions for everything else. 
 
 
+#TODO: introduce better error checking. If we are in VMX root operation, the CPU will return an error number which we can use to debug. 
+
 .section .text, "ax"
+
+#RDI contains physical pointer
 
 SYM_FUNC_START(__vmx_support)
     push rbx
@@ -23,9 +27,7 @@ SYM_FUNC_START(__vmx_support)
     ret
 SYM_FUNC_END(__vmx_support)
 
-#RDI contains physical pointer
-
-SYM_FUNC_START(vmx_on)
+SYM_FUNC_START(__vmx_on)
     
     push rdi    
     vmxon [rsp]
@@ -33,19 +35,32 @@ SYM_FUNC_START(vmx_on)
     add rsp, 8
     ret
 
-SYM_FUNC_END(vmx_on)
+SYM_FUNC_END(__vmx_on)
 
-SYM_FUNC_START(vmx_off)
+SYM_FUNC_START(__vmx_off)
     vmxoff
     ret
 
-SYM_FUNC_END(vmx_off)
+SYM_FUNC_END(__vmx_off)
 
-SYM_FUNC_START(enable_vtx_cr4)
 
-mov rax, cr4
-or rax, X86_CR4_VMXE
-mov cr4, rax
-ret
 
-SYM_FUNC_END(enable_vtx_cr4)
+#vm_write semantics:
+#   RDI contains field to write to. This value should originate from VMCS_ENCODING 
+#   RSI contains value to write to field referenced by RDI.
+
+SYM_FUNC_START(__vm_write)
+    vmwrite rdi, rsi
+    setbe al
+    ret
+SYM_FUNC_END(__vm_write)
+
+
+
+SYM_FUNC_START(vm_clear)
+    vmclear
+    setbe al
+SYM_FUNC_END(vm_clear)
+
+
+

@@ -4,6 +4,8 @@
 #include "depend.h"
 
 
+struct vmx_cpu __percpu *vmx_cpu_pcpu;
+
 /*
 The intel VMCS as well as the VMX strcture are technically opaque data structures as their structure may change between . The former should be accessed via the vmwrite and vmread instructions. 
 */
@@ -43,7 +45,7 @@ struct vmx_cpu{
 
 
 
-DECLARE_PER_CPU(struct vmx_cpu*, percpu_vmx_cpu);
+
 
 struct vmx_cpu* alloc_vmx_cpu(int cpu);
 void free_vmx_cpu(struct vmx_cpu* vmx_cpu);

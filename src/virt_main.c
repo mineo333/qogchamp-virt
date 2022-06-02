@@ -1,12 +1,29 @@
 #include "depend.h"
 #include "util.h"
 #include "vmx.h"
+#include "vmx_region.h" //for vmx_cpu type
 
 
+int virt_setup(){
+    vmx_cpu_pcpu = alloc_per_cpu(struct vmx_cpu*);
+    if(!vmx_cpu_pcpu){
+        return -ENOMEM;
+    }
 
+    vmx_on_pcpu = alloc_per_cpu(int);
 
+    if(!vmx_on_pcpu){
+        return -ENOMEM;
+    }
+
+}
 
 int virt_init(void){
+
+    if(virt_setup()){
+        return -ENOMEM;
+    }
+    
     pr_info("Initializing hypervisor\n");
     if(vmx_support())
         pr_info("VMX Supported: true\n");
@@ -21,6 +38,10 @@ int virt_init(void){
 }
 
 void virt_cleanup(void){
+
+    free_per_cpu(vmx_cpu_pcpu);
+    free_per_cpu(vmx_on_pcpu);
+
     pr_info("Cleaning up\n");
 
 }

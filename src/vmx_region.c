@@ -43,6 +43,8 @@ struct vmx_cpu* alloc_vmx_cpu(int cpu){
         kfree(vmx_cpu);
     }
 
+    
+
 
     return vmx_cpu;
     

@@ -3,26 +3,47 @@
 
 #include "depend.h"
 
-#undef wrmsr //get rid of the two definitions. we're using our own. 
-#undef rdmsr
+
 
 #define VMX_BIT 1 << 5
 
 #define REVISION_ID_MASK ((1 << 31) - 1);
 
+int __percpu vmx_on_pcpu; //should be 1 for percpu var if we are in vmx root operation. Otherwise, 0
+
+/*BEGIN ASSEMBLY HELPER PROTOTYPES*/
+
+u8 __vmx_on(phys_addr_t page_addr);
+
+void __vmx_off(void);
+
+u8 __vm_write(u64 field, u64 value);
+
 int __vmx_support(void);
 
-static inline int vmxon(uint64_t phys)
-{
-	uint8_t ret;
 
-	__asm__ __volatile__ ("vmxon %[pa]; setna %[ret]"
-		: [ret]"=rm"(ret)
-		: [pa]"m"(phys)
-		: "cc", "memory");
+/*END ASSEMBLY HELPER PROTOTYPES*/
 
-	return ret;
+static inline u8 vmx_on(phys_addr_t page_addr){
+    
+    if(this_cpu_read(vmx_on_pcpu)){
+        __WARN(); //warn if we are already in vmx_on mode
+        return 0;
+    }  
+
+    return __vmx_on(page_addr);    
 }
+
+static inline void vmx_off(void){
+    if(!this_cpu_read(vmx_on_pcpu)){
+        BUG();
+        return;
+    }
+
+    __vmx_off();
+
+}
+
 
 static inline uint64_t rdmsr(uint32_t msr)
 {
@@ -41,20 +62,19 @@ static inline void wrmsr(uint32_t msr, uint64_t value)
 	__asm__ __volatile__("wrmsr" :: "a"(a), "d"(d), "c"(msr) : "memory");
 }
 
+static inline u8 vm_write(u64 field, u64 value){
+    
+}   
 
+static inline int vmx_support(void){
+    return __vmx_support() & VMX_BIT;
+}
 
-
-u8 vmx_on(phys_addr_t page_addr);
-
-void vmx_off(void);
-
-
-void enable_vtx_cr4(void);
-
-int vmx_support(void); //wrapper for __vmx_supprt
 
 
 void vmx_setup(void* info);
+
+
 /*
 
 Everything below is from:  https://github.com/LordNoteworthy/cpu-internals/master/headers/vmx.h
@@ -64,7 +84,7 @@ Everything below is from:  https://github.com/LordNoteworthy/cpu-internals/maste
 // Updated to reflect Intel SDM of January 2019
 
 // Appendix B Field Encoding in VMCS
-enum _VMCS_ENCODING
+enum VMCS_ENCODING
 {
     VIRTUAL_PROCESSOR_ID = 0x00000000,  // 16-Bit Control Field
     POSTED_INTERRUPT_NOTIFICATION = 0x00000002,
@@ -250,7 +270,7 @@ enum _VMCS_ENCODING
 };
 
 // Appendix C VMX Basic Exit Reasons
-enum _VM_EXIT_REASON
+enum VM_EXIT_REASON
 {
     EXIT_REASON_EXCEPTION_NMI = 0,        // Exception or non-maskable interrupt (NMI).
     EXIT_REASON_EXTERNAL_INTERRUPT = 1,   // External interrupt.
