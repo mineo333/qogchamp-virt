@@ -15,8 +15,8 @@ int virt_init(void){
         return -ENODEV;  
     }
     //if VT-x is supported we may continue
-    //on_each_cpu(vmx_setup, NULL, 0); 
-   vmx_setup(NULL);
+    on_each_cpu(vmx_setup, NULL, 1); 
+   //vmx_setup(NULL);
     return 0;
 }
 

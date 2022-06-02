@@ -43,7 +43,7 @@ struct vmx_cpu{
 
 
 
-DECLARE_PER_CPU(struct qogchamp_vmcs*, percpu_vmcs);
+DECLARE_PER_CPU(struct vmx_cpu*, percpu_vmx_cpu);
 
 struct vmx_cpu* alloc_vmx_cpu(int cpu);
 void free_vmx_cpu(struct vmx_cpu* vmx_cpu);

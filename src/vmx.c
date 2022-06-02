@@ -44,7 +44,7 @@ static unsigned int vmcs_revision_id(void){
 	return rdmsr(MSR_IA32_VMX_BASIC) & REVISION_ID_MASK; 
 }
 
-static void setup_vmx_cpu(struct vmx_cpu* vmx_cpu){
+static void setup_vmx_on(struct vmx_cpu* vmx_cpu){
 	struct vmx_on_region* vmx_on_region = vmx_cpu->vmx_on->vmx_on;
 	vmx_on_region -> vmcs_revision_id = vmcs_revision_id();
 }
@@ -66,7 +66,9 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
     
 	vtx_feature_check();
 
-	setup_vmx_cpu(vmx_cpu);
+	setup_vmx_on(vmx_cpu);
+
+	//this_cpu_write(percpu_vmx_cpu, vmx_cpu);
 
 
     
@@ -83,6 +85,8 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
     vmx_off();
 
 	pr_info("CPU %d has noe exited VMX Root Operation!\n", cpu);
+
+	
 
     
 out:  

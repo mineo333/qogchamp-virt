@@ -50,6 +50,8 @@ struct vmx_cpu* alloc_vmx_cpu(int cpu){
 
 void free_vmx_cpu(struct vmx_cpu* vmx_cpu){
 
+    BUG_ON(vmx_cpu -> cpu != __smp_processor_id()); //the semantics of this are still up for question. Should this only be freeable on the same CPU? 
+
     BUG_ON(!vmx_cpu -> vmcs);
     BUG_ON(!vmx_cpu -> vmx_on);
     
