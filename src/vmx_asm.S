@@ -48,19 +48,35 @@ SYM_FUNC_END(__vmx_off)
 #vm_write semantics:
 #   RDI contains field to write to. This value should originate from VMCS_ENCODING 
 #   RSI contains value to write to field referenced by RDI.
-
+#   on fail return 1
 SYM_FUNC_START(__vm_write)
     vmwrite rdi, rsi
     setbe al
     ret
 SYM_FUNC_END(__vm_write)
 
+#vm_clear semantics:
+#   RDI contains 
 
-
-SYM_FUNC_START(vm_clear)
-    vmclear
+SYM_FUNC_START(__vm_clear)
+    push rdi
+    vmclear [rsp]
     setbe al
-SYM_FUNC_END(vm_clear)
+    add rsp, 8
+    ret
+SYM_FUNC_END(__vm_clear)
 
 
 
+SYM_FUNC_START(__vm_read)
+
+
+SYM_FUNC_END(__vm_read)
+
+
+
+
+SYM_FUNC_START(get_cs_sel)
+    mov ax, cs
+    ret
+SYM_FUNC_END(get_cs_sel)

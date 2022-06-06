@@ -1,6 +1,6 @@
 #include "vmx.h"
 #include "vmx_region.h"
-
+#include "percpu_ops.h"
 
 static void vtx_feature_check(void){
 	uint64_t feature_control;
@@ -49,9 +49,11 @@ static void setup_vmx_on(struct vmx_cpu* vmx_cpu){
 
 static void setup_vmcs(struct vmx_cpu* vmx_cpu){
 	struct vmcs* vmcs = vmx_cpu -> vmcs -> vmcs;
-
+	phys_addr_t vmcs_addr = vmx_cpu -> vmcs -> phys_addr;
 	vmcs -> vmcs_hdr.revision_id = vmcs_revision_id(); //setup revision id
 
+
+	
 
 
 	
@@ -79,7 +81,7 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
 
 	setup_vmx_on(vmx_cpu);
 
-	this_cpu_write(percpu_vmx_cpu, vmx_cpu);
+	this_cpu_write(vmx_cpu_pcpu, vmx_cpu);
 
 
     
@@ -107,15 +109,12 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
     
 out:  
     if(vmx_cpu){
+		this_cpu_write(vmx_cpu_pcpu, NULL);
 		free_vmx_cpu(vmx_cpu);
-		this_cpu_write(percpu_vmx_cpu, NULL);
+		
 	}
-        
 	
-
     put_cpu();
-    
-    
 }
 
 /*

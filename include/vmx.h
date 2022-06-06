@@ -2,14 +2,16 @@
 #define __VIRT_VMX_H
 
 #include "depend.h"
+#include "percpu_ops.h"
 
-
+#undef rdmsr //undef so we can use our own definitions :)
+#undef wrmsr
 
 #define VMX_BIT 1 << 5
 
 #define REVISION_ID_MASK ((1 << 31) - 1);
 
-int __percpu vmx_on_pcpu; //should be 1 for percpu var if we are in vmx root operation. Otherwise, 0
+extern int __percpu *vmx_on_pcpu; //should be 1 for percpu var if we are in vmx root operation. Otherwise, 0
 
 /*BEGIN ASSEMBLY HELPER PROTOTYPES*/
 
@@ -27,7 +29,7 @@ int __vmx_support(void);
 static inline u8 vmx_on(phys_addr_t page_addr){
     
     if(this_cpu_read(vmx_on_pcpu)){
-        __WARN(); //warn if we are already in vmx_on mode
+        pr_err("vmxon called in vmx root operation!");
         return 0;
     }  
 
@@ -35,8 +37,8 @@ static inline u8 vmx_on(phys_addr_t page_addr){
 }
 
 static inline void vmx_off(void){
-    if(!this_cpu_read(vmx_on_pcpu)){
-        BUG();
+    if(!this_cpu_read(vmx_on_pcpu)){ //if vmx_on_pcpu is NULL, leave as we are not in vmx root operation. 
+        pr_err("vmxoff called in non-vmx-root context!\n");
         return;
     }
 
@@ -63,7 +65,7 @@ static inline void wrmsr(uint32_t msr, uint64_t value)
 }
 
 static inline u8 vm_write(u64 field, u64 value){
-    
+    return 0;
 }   
 
 static inline int vmx_support(void){

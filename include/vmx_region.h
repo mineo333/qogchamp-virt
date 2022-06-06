@@ -3,8 +3,11 @@
 
 #include "depend.h"
 
+#include "arch.h"
 
-struct vmx_cpu __percpu *vmx_cpu_pcpu;
+
+extern struct vmx_cpu __percpu **vmx_cpu_pcpu;
+
 
 /*
 The intel VMCS as well as the VMX strcture are technically opaque data structures as their structure may change between . The former should be accessed via the vmwrite and vmread instructions. 
@@ -39,6 +42,9 @@ struct vmx_cpu{
     unsigned int cpu;
     struct vmx_region* vmcs; //this is probably questionable design and can probably be improved. 
     struct vmx_region* vmx_on;
+    struct gdt_ptr gdt;
+    
+
 };
 
 
