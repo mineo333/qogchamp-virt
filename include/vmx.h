@@ -13,7 +13,11 @@
 
 extern int __percpu *vmx_on_pcpu; //should be 1 for percpu var if we are in vmx root operation. Otherwise, 0
 
+extern struct vmx_region __percpu **valid_vmcs_pcpu; //if the percpu is NULL, 
+
 /*BEGIN ASSEMBLY HELPER PROTOTYPES*/
+
+
 
 u8 __vmx_on(phys_addr_t page_addr);
 
@@ -23,6 +27,10 @@ u8 __vm_write(u64 field, u64 value);
 
 int __vmx_support(void);
 
+u8 __vm_ptrld(phys_addr_t vmcs_addr);
+
+u8 __vm_clear(phys_addr_t vmcs_addr);
+
 
 /*END ASSEMBLY HELPER PROTOTYPES*/
 
@@ -30,10 +38,29 @@ static inline u8 vmx_on(phys_addr_t page_addr){
     
     if(this_cpu_read(vmx_on_pcpu)){
         pr_err("vmxon called in vmx root operation!");
-        return 0;
+        return -1;
     }  
 
     return __vmx_on(page_addr);    
+}
+
+static inline u8 vm_ptrld(phys_addr_t vmcs_addr){
+    if(!this_cpu_read(vmx_on_pcpu)){ //if vmx_on_pcpu is NULL, leave as we are not in vmx root operation. 
+        pr_err("vmptrld called in non-VMX root context!\n");
+        return -1;
+    }
+
+    return __vm_ptrld(vmcs_addr);
+}
+
+static inline u8 vm_clear(phys_addr_t vmcs_addr){
+    if(!this_cpu_read(vmx_on_pcpu)){ //if vmx_on_pcpu is NULL, leave as we are not in vmx root operation. 
+        pr_err("vmclear called in non-VMX root context!\n");
+        return -1;
+    }
+
+    return __vm_clear(vmcs_addr);
+    
 }
 
 static inline void vmx_off(void){
@@ -45,6 +72,8 @@ static inline void vmx_off(void){
     __vmx_off();
 
 }
+
+
 
 
 static inline uint64_t rdmsr(uint32_t msr)
@@ -68,9 +97,14 @@ static inline u8 vm_write(u64 field, u64 value){
     return 0;
 }   
 
+static inline u64 vm_read(u64 field){
+    return 0;
+}
+
 static inline int vmx_support(void){
     return __vmx_support() & VMX_BIT;
 }
+
 
 
 

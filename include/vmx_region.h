@@ -40,7 +40,7 @@ struct vmx_region{ //this is used for both the VMXON region as well as the VMCS
 
 struct vmx_cpu{
     unsigned int cpu;
-    struct vmx_region* vmcs; //this is probably questionable design and can probably be improved. 
+    struct vmx_region* vmcs_region; //this is probably questionable design and can probably be improved. - This was indeed questionable design
     struct vmx_region* vmx_on;
     struct gdt_ptr gdt;
     

@@ -6,6 +6,8 @@
 
 struct vmx_cpu __percpu **vmx_cpu_pcpu;
 
+struct vmx_region __percpu **valid_vmcs_pcpu; 
+
 int __percpu *vmx_on_pcpu; 
 
 static int virt_setup(void){
@@ -17,6 +19,12 @@ static int virt_setup(void){
     vmx_on_pcpu = alloc_percpu(int);
 
     if(!vmx_on_pcpu){
+        return -ENOMEM;
+    }
+
+    valid_vmcs_pcpu = alloc_percpu(struct vmx_region*);
+
+    if(!valid_vmcs_pcpu){
         return -ENOMEM;
     }
 

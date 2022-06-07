@@ -5,7 +5,7 @@
 #undef this_cpu_read
 
 /*
-Fuck per-cpu ops, so I redid the macros. 
+The current percpu operations didn't work with 
 */
 
 #define this_cpu_write(pcp, nval)                    \

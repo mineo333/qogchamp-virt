@@ -48,14 +48,34 @@ static void setup_vmx_on(struct vmx_cpu* vmx_cpu){
 }
 
 static void setup_vmcs(struct vmx_cpu* vmx_cpu){
-	struct vmcs* vmcs = vmx_cpu -> vmcs -> vmcs;
-	phys_addr_t vmcs_addr = vmx_cpu -> vmcs -> phys_addr;
+	struct vmcs* vmcs = vmx_cpu -> vmcs_region -> vmcs;
+	phys_addr_t vmcs_addr = vmx_cpu -> vmcs_region -> phys_addr;
+	
+	
+	
+	if(vm_clear(vmcs_addr)){
+		pr_err("vmclear failed\n");
+		return;
+	}
+
 	vmcs -> vmcs_hdr.revision_id = vmcs_revision_id(); //setup revision id
+
+	if(vm_ptrld(vmcs_addr)){
+		pr_err("vmptrld failed\n");
+		return;
+	}
+
+	pr_info("VMCS loaded!\n");
 
 
 	
+}
 
-
+static void clear_vmcs(struct vmx_cpu* vmx_cpu){
+	phys_addr_t vmcs_addr = vmx_cpu -> vmcs_region -> phys_addr;
+	if(vm_clear(vmcs_addr)){
+		pr_err("vmclear failed\n");
+	}
 	
 }
 
@@ -97,6 +117,10 @@ static void __vmx_setup(void){ //this function **might** run in interrupt contex
 
 
     pr_info("CPU %d is now in VMX Root Operation!\n", cpu);
+
+	setup_vmcs(vmx_cpu);
+
+	clear_vmcs(vmx_cpu);
 
     vmx_off(); //if this faults it will be invalid opcode. so we'll die anyway :)
 

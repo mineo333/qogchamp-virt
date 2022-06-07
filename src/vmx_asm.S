@@ -69,13 +69,17 @@ SYM_FUNC_END(__vm_clear)
 
 
 SYM_FUNC_START(__vm_read)
-
+    
 
 SYM_FUNC_END(__vm_read)
 
 
-
-
+SYM_FUNC_START(__vm_ptrld)
+    push rdi
+    vmptrld [rsp]
+    setbe al
+    add rsp, 8
+    ret
 SYM_FUNC_START(get_cs_sel)
     mov ax, cs
     ret
